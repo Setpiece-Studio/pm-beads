@@ -1,0 +1,194 @@
+/* ABOUTME: Global stylesheet — Tailwind v4 entry plus the Linear-style neutral theme variables. */
+/* ABOUTME: Defines light/dark CSS variables consumed by shadcn components and app chrome. */
+
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Linear's shell has no divider between the nav and the content: the two grays do the
+ * separating. The sidebar is the darker of the pair, the content pane the lighter one.
+ * Hex equivalents are noted so the palette stays checkable against reference screenshots.
+ */
+:root {
+  --background: oklch(0.9911 0 0); /* #fcfcfc — content pane */
+  --foreground: oklch(0.2855 0.0113 271); /* #282a30 */
+  --card: oklch(1 0 0); /* #ffffff */
+  --card-foreground: oklch(0.2855 0.0113 271);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2855 0.0113 271);
+  --primary: oklch(0.2855 0.0113 271);
+  --primary-foreground: oklch(0.9911 0 0);
+  --secondary: oklch(0.9579 0.0029 264.54); /* #f0f1f3 */
+  --secondary-foreground: oklch(0.2855 0.0113 271);
+  --muted: oklch(0.9579 0.0029 264.54);
+  --muted-foreground: oklch(0.5406 0.0119 261.77); /* #6b6f76 */
+  --accent: oklch(0.9484 0.0046 258.32); /* #eceef1 */
+  --accent-foreground: oklch(0.2855 0.0113 271);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.9281 0.0042 271.37); /* #e6e7ea */
+  --input: oklch(0.9281 0.0042 271.37);
+  --ring: oklch(0.7665 0.0105 267.34); /* #b0b3ba */
+  --sidebar: oklch(0.9784 0.0011 197.14); /* #f7f8f8 — darker than content */
+  --sidebar-foreground: oklch(0.2855 0.0113 271);
+  --sidebar-accent: oklch(0.9281 0.0042 271.37); /* #e6e7ea */
+  --sidebar-accent-foreground: oklch(0.2855 0.0113 271);
+  --sidebar-border: oklch(0.9281 0.0042 271.37);
+  --sidebar-ring: oklch(0.7665 0.0105 267.34);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: oklch(0.2437 0.0059 271.17); /* #1f2023 — content pane */
+  --foreground: oklch(0.9784 0.0011 197.14); /* #f7f8f8 */
+  --card: oklch(0.2733 0.0075 274.68); /* #26272b */
+  --card-foreground: oklch(0.9784 0.0011 197.14);
+  --popover: oklch(0.2733 0.0075 274.68);
+  --popover-foreground: oklch(0.9784 0.0011 197.14);
+  --primary: oklch(0.9484 0.0046 258.32); /* #eceef1 */
+  --primary-foreground: oklch(0.2437 0.0059 271.17);
+  --secondary: oklch(0.2977 0.0073 274.72); /* #2c2d31 */
+  --secondary-foreground: oklch(0.9784 0.0011 197.14);
+  --muted: oklch(0.2977 0.0073 274.72);
+  --muted-foreground: oklch(0.6488 0.0146 262.36); /* #8a8f98 */
+  --accent: oklch(0.3141 0.009 276.85); /* #303136 */
+  --accent-foreground: oklch(0.9784 0.0011 197.14);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.4574 0.0116 273.17); /* #55575e */
+  --sidebar: oklch(0.2189 0.0099 276.6); /* #191a1f — darker than content */
+  --sidebar-foreground: oklch(0.9784 0.0011 197.14);
+  --sidebar-accent: oklch(0.2977 0.0073 274.72); /* #2c2d31 */
+  --sidebar-accent-foreground: oklch(0.9784 0.0011 197.14);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.4574 0.0116 273.17);
+}
+
+@theme inline {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body {
+    @apply h-full overflow-hidden;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+/*
+ * @uiw/react-md-editor (the MarkdownEditor component) is styled for GitHub: it reads a handful of
+ * --color-* custom properties off the `wmde-markdown-var` class it puts on its own root. Re-point
+ * those at the shadcn tokens so the editor belongs to the app in both themes.
+ *
+ * The `:root`/`.dark` prefixes are load-bearing: the editor's stylesheet arrives with its dynamic
+ * import, so it lands AFTER this file and would win any specificity tie against a bare
+ * `.w-md-editor`.
+ *
+ * `[data-color-mode]` is here purely for specificity. The root element carries that attribute now
+ * (set alongside the theme class in __root.tsx) so the library applies its own syntax palette to
+ * the right theme — but those same `[data-color-mode*='…'] .w-md-editor` rules also re-assert the
+ * canvas colours, and they tie with a bare `:root .w-md-editor` and win on order. Matching the
+ * attribute here outweighs them, so the editor keeps the app's background and the library keeps
+ * its syntax colours.
+ */
+:root[data-color-mode] .w-md-editor,
+.dark[data-color-mode] .w-md-editor {
+  font-family: inherit;
+  --md-editor-font-family: inherit;
+  --color-canvas-default: var(--background);
+  --color-border-default: var(--border);
+  --color-fg-default: var(--foreground);
+  --color-accent-fg: var(--foreground);
+  --color-neutral-muted: var(--accent);
+  --color-danger-fg: var(--destructive);
+  border-radius: var(--radius-md);
+}
+
+/*
+ * The visible source is a mirrored <pre>; the textarea over it paints its text transparent, so
+ * the caret needs a colour of its own or it disappears in dark mode.
+ */
+:root .w-md-editor-text-input,
+.dark .w-md-editor-text-input {
+  caret-color: var(--foreground);
+}
+
+/*
+ * Fit the editor to what is typed rather than to a fixed box. `height="auto"` on the component
+ * lets the root collapse onto its content; this bounds the scrolling area so an empty field
+ * still offers somewhere to click and a very long one stops growing and scrolls instead.
+ * The bounds arrive as custom properties set by MarkdownEditor, which owns the numbers.
+ */
+:root .w-md-editor-content,
+.dark .w-md-editor-content {
+  min-height: var(--md-editor-min-height, 120px);
+  max-height: var(--md-editor-max-height, 640px);
+  overflow-y: auto;
+}
+
+/*
+ * Honour the OS setting. Every animation in the app is a transition or an entrance — none of
+ * them carries meaning the layout does not already state — so collapsing them loses nothing.
+ * Deliberately unlayered rather than `!important` inside @layer base: unlayered rules outrank
+ * every Tailwind layer, so `transition-all` and the menus' entrance animations both give way.
+ * Collapsed rather than removed: a zero-length transition still fires transitionend, which
+ * radix primitives wait on before unmounting.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}
+/* Inbox panes always use the same compact properties layout as narrow detail panes. */
+@custom-variant detail-compact {
+  @container (width < 751px) {
+    @slot;
+  }
+  &:where([data-compact-properties] *) {
+    @slot;
+  }
+}

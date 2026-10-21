@@ -1,0 +1,98 @@
+[
+  {
+    "id": "pm-beads-c55",
+    "title": "bd data layer: server functions wrapping the bd CLI",
+    "description": "Server-side module that shells out to bd with --json and parses output through zod schemas. Reads: list (with filters), show (incl. dependencies/comments), stats. Writes: update status/priority/assignee/labels, close, create. Config for which beads project dir to target (env or config file). Epic-children query via bd list --parent \u003cid\u003e. Unit + integration tests against a throwaway bd database.",
+    "status": "in_progress",
+    "priority": 1,
+    "issue_type": "feature",
+    "assignee": "Alex Example",
+    "owner": "alex@example.test",
+    "created_at": "2026-06-12T18:34:51Z",
+    "created_by": "Alex Example",
+    "updated_at": "2026-06-12T18:49:07Z",
+    "labels": ["data-layer"],
+    "dependencies": [
+      {
+        "id": "pm-beads-18y",
+        "title": "Scaffold TanStack Start app",
+        "description": "Create the TanStack Start project: Vite, TypeScript, Tailwind, shadcn/ui, Biome, zod. Mise for tasks/env. Memorable dev port. Verify dev server boots and a hello route renders.",
+        "status": "closed",
+        "priority": 1,
+        "issue_type": "task",
+        "assignee": "Alex Example",
+        "owner": "alex@example.test",
+        "created_at": "2026-06-12T18:34:51Z",
+        "created_by": "Alex Example",
+        "updated_at": "2026-06-12T18:49:05Z",
+        "closed_at": "2026-06-12T18:49:05Z",
+        "close_reason": "TanStack Start scaffolded at repo root: port 8345, shadcn (14 components), Tailwind v4 neutral theme, Biome clean, vitest green with dedicated config (nitro plugin excluded to avoid teardown hang), SSR verified via nitro build. Routes /projects, /issues placeholders.",
+        "dependency_type": "blocks"
+      },
+      {
+        "id": "pm-beads-vjt",
+        "title": "pm-beads v1: Linear-style web UI for beads",
+        "description": "A local, lightweight Linear-style web UI on top of the beads (bd) issue tracker. Greenfield TanStack Start app (decided over forking beads-web, which is 28K LOC of Next.js + Rust/Axum whose UI we'd mostly replace anyway). Stack: TanStack Start, TanStack Table, shadcn/ui, Tailwind, zod, Biome. Data access: server functions shelling out to bd --json. V1 scope: projects (epics) view with expandable child issues, issues view with Linear-style grouping/sorting/filtering, side-panel detail with inline edits. Deferred: workspace picker (single project via config), board view, charts.",
+        "status": "open",
+        "priority": 1,
+        "issue_type": "epic",
+        "owner": "alex@example.test",
+        "created_at": "2026-06-12T18:34:20Z",
+        "created_by": "Alex Example",
+        "updated_at": "2026-06-12T18:34:20Z",
+        "dependency_type": "parent-child"
+      }
+    ],
+    "dependents": [
+      {
+        "id": "pm-beads-0f7",
+        "title": "Issues view: Linear-style table/list with grouping and sorting",
+        "description": "TanStack Table issues view. Grouping by status, label, project (epic); sorting by priority and status; filtering by status/type/label/assignee. Linear-style collapsed group headers with counts. Display columns: ID, status icon, title, labels, epic, priority, updated. Row click opens side panel.",
+        "status": "open",
+        "priority": 1,
+        "issue_type": "feature",
+        "owner": "alex@example.test",
+        "created_at": "2026-06-12T18:34:52Z",
+        "created_by": "Alex Example",
+        "updated_at": "2026-06-12T18:34:52Z",
+        "dependency_type": "blocks"
+      },
+      {
+        "id": "pm-beads-4aa",
+        "title": "Side-panel detail view with inline edits",
+        "description": "Detail side panel (beads-web style, not full page) for issues and epics: title, description, design, acceptance criteria, notes, comments, dependencies. Inline editing of status, priority, assignee, labels via bd update. Epic detail shows child issues in an inline table at the bottom (no separate tab). Mutations optimistically update then refetch.",
+        "status": "open",
+        "priority": 1,
+        "issue_type": "feature",
+        "owner": "alex@example.test",
+        "created_at": "2026-06-12T18:34:53Z",
+        "created_by": "Alex Example",
+        "updated_at": "2026-06-12T18:34:53Z",
+        "dependency_type": "blocks"
+      },
+      {
+        "id": "pm-beads-aje",
+        "title": "Projects view: epics table with expandable child issues",
+        "description": "Linear projects-style view listing epics: status grouping, priority sort, progress % from epic_closed_children/epic_total_children, issue counts. Each epic row expands inline to show its child issues (parent-child deps / bd list --parent) — the drill-in Linear doesn't do. Row click opens side panel.",
+        "status": "open",
+        "priority": 1,
+        "issue_type": "feature",
+        "owner": "alex@example.test",
+        "created_at": "2026-06-12T18:34:53Z",
+        "created_by": "Alex Example",
+        "updated_at": "2026-06-12T18:34:53Z",
+        "dependency_type": "blocks"
+      }
+    ],
+    "comments": [
+      {
+        "id": "019ebd2c-6ab6-7b2b-8b84-bafa31a3101b",
+        "issue_id": "pm-beads-c55",
+        "author": "Alex Example",
+        "text": "INVESTIGATION (orchestrator, verified against bd v1.0.5-110 on this repo's own db):\n\nREAD COMMANDS\n- bd list --json --all → all issues incl. closed. Default EXCLUDES closed. Flags: --status (comma-sep ok: open,in_progress), --type, --parent \u003cepicId\u003e (recursive children, excludes closed by default), --assignee, --sort priority|created|updated|status|id|title|type, --limit.\n- bd show \u003cid\u003e --json → SINGLE-element ARRAY with full issue + dependents[] + dependencies[]. Each dependent has dependency_type field (parent-child|blocks|...).\n- bd epic status --json → array of {epic: {...issue}, total_children, closed_children, eligible_for_close}. THIS is the source for projects-view progress. (Note: bd list does NOT include epic_* computed fields.)\n\nVERIFIED ISSUE SHAPE (bd list --json element):\nid, title, description, status(open|in_progress|blocked|deferred|closed), priority(0-4 int), issue_type(task|bug|feature|epic|chore), owner, assignee?, created_at, created_by, updated_at, closed_at?, close_reason?, labels?: string[] (ABSENT when empty, not null), dependencies?: [{issue_id, depends_on_id, type, created_at, created_by, metadata(JSON string)}], dependency_count, dependent_count, comment_count, parent? (epic id). Optional fields are ABSENT not null — zod schemas must use .optional().\n\nWRITE COMMANDS\n- bd update \u003cid\u003e --status X --priority N --assignee S --title S --description S --notes S (any subset, one call)\n- bd label add|remove \u003cid\u003e \u003clabel\u003e  (NOT bd update --label; that silently no-ops!)\n- bd close \u003cid\u003e --reason S ; bd create --title S --type T --priority N --description S --json (returns created issue)\n- Writes are single-writer file-locked (embedded dolt) — serialize writes server-side, never run bd write calls in parallel.\n\nENV: which beads project to target = PM_BEADS_PROJECT_DIR env (set in mise.toml [env], defaults to repo root). Spawn with execFile('bd', [...], {cwd: projectDir}).\n\nGOTCHAS: bd show returns ARRAY. deps metadata is a JSON *string*. Permission-warning lines can appear on stderr — parse stdout only. Comments on an issue: bd comments \u003cid\u003e --json (verify shape yourself).",
+        "created_at": "2026-06-12T18:51:05Z"
+      }
+    ],
+    "parent": "pm-beads-vjt"
+  }
+]

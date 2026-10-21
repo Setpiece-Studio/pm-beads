@@ -1,0 +1,19 @@
+[
+  {
+    "epic": {
+      "id": "pm-beads-vjt",
+      "title": "pm-beads v1: Linear-style web UI for beads",
+      "description": "A local, lightweight Linear-style web UI on top of the beads (bd) issue tracker. Greenfield TanStack Start app (decided over forking beads-web, which is 28K LOC of Next.js + Rust/Axum whose UI we'd mostly replace anyway). Stack: TanStack Start, TanStack Table, shadcn/ui, Tailwind, zod, Biome. Data access: server functions shelling out to bd --json. V1 scope: projects (epics) view with expandable child issues, issues view with Linear-style grouping/sorting/filtering, side-panel detail with inline edits. Deferred: workspace picker (single project via config), board view, charts.",
+      "status": "open",
+      "priority": 1,
+      "issue_type": "epic",
+      "owner": "alex@example.test",
+      "created_at": "2026-06-12T18:34:20Z",
+      "created_by": "Alex Example",
+      "updated_at": "2026-06-12T18:34:20Z"
+    },
+    "total_children": 6,
+    "closed_children": 1,
+    "eligible_for_close": false
+  }
+]

@@ -1,0 +1,15 @@
+[tools]
+node = "24"
+bun = "1.3.14"
+
+[tasks.dev]
+run = "bun run dev"
+description = "Start the pm-beads dev server"
+
+[tasks.test]
+run = "bun run test"
+description = "Run unit and integration tests"
+
+[tasks.test-e2e]
+run = "bun run test:e2e"
+description = "Run Playwright e2e tests against a throwaway seeded beads project"

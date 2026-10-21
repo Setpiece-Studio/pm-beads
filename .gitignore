@@ -1,0 +1,37 @@
+node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+.env
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+__unconfig*
+todos.json
+
+# Beads embedded Dolt database (runtime, not versioned)
+.beads/embeddeddolt/
+
+# Playwright artifacts
+test-results/
+playwright-report/
+output/playwright/
+.playwright-cli/
+
+# Agent worktrees (each is a full checkout; regenerated per agent run)
+.claude/worktrees/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/pm-beads-sync.json
+.beads/pm-beads-sync.json.*.tmp
+.beads/proxieddb/
+
+# Per-developer mise env (PM_BEADS_USER etc.)
+mise.local.toml
+.dev-server.log

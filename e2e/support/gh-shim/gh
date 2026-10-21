@@ -1,0 +1,44 @@
+#!/bin/sh
+# ABOUTME: PATH-prepended `gh` stand-in for the e2e run — answers `gh pr view <url> --json ...`
+# ABOUTME: and `gh pr list --repo ...` with canned payloads, so no test needs a GitHub round trip.
+#
+# Prepended to the dev server's PATH by playwright.config.ts.
+#
+# `pr view`: the number in the requested url picks the payload — /pull/42 is an open PR, /pull/43
+# is merged, anything else is unknown to gh (exit 1), which the app must degrade to the "Unknown"
+# badge rather than an error.
+#
+# `pr list` (the merged-PR sweep): e2e-owner/e2e-repo reports #43 and only #43 as merged, so a
+# bead linked to 43 is swept and a bead linked to 42 or 99 is left alone. Any other repo exits 1,
+# which the sweep must degrade into a warning rather than a failure.
+#
+# `pr list ... headRefName ...` (the PR-history backfill) asks for more fields than the sweep, and
+# its payload has to quote bead ids bd minted at run time — so it is not canned here but read from
+# the file named by PM_BEADS_E2E_PR_HISTORY, which the backfill spec writes after seeding.
+
+case "$*" in
+  *"pr list"*"headRefName"*)
+    if [ -n "$PM_BEADS_E2E_PR_HISTORY" ] && [ -f "$PM_BEADS_E2E_PR_HISTORY" ]; then
+      cat "$PM_BEADS_E2E_PR_HISTORY"
+    else
+      printf '%s\n' '[]'
+    fi
+    ;;
+  *"pr list"*"e2e-owner/e2e-repo"*)
+    printf '%s\n' '[{"number":43,"url":"https://github.com/e2e-owner/e2e-repo/pull/43","mergedAt":"2026-08-01T12:00:00Z"}]'
+    ;;
+  *"pr list"*)
+    echo "gh (e2e shim): no canned merged pull requests for: $*" >&2
+    exit 1
+    ;;
+  *"/pull/42"*)
+    printf '%s\n' '{"number":42,"title":"Shimmed open pull request","state":"OPEN","isDraft":false,"mergedAt":null,"url":"https://github.com/e2e-owner/e2e-repo/pull/42"}'
+    ;;
+  *"/pull/43"*)
+    printf '%s\n' '{"number":43,"title":"Shimmed merged pull request","state":"MERGED","isDraft":false,"mergedAt":"2026-08-01T12:00:00Z","url":"https://github.com/e2e-owner/e2e-repo/pull/43"}'
+    ;;
+  *)
+    echo "gh (e2e shim): no canned pull request for: $*" >&2
+    exit 1
+    ;;
+esac

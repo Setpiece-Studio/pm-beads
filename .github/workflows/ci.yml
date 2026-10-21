@@ -1,0 +1,164 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+# bd's embedded Dolt backend allows only one process against a database at a time, so
+# don't run more than one gate against the same ref's checkout concurrently.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Pinned to match the beads suite's expected behaviour (see CONTRIBUTING.md /
+  # pm-beads-8za) — do not bump without re-verifying test/e2e against the new version.
+  BD_VERSION: 1.2.2
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - name: Cache bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - name: Cache bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - name: Cache bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+
+  test:
+    runs-on: ubuntu-latest
+    env:
+      BD_NON_INTERACTIVE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - name: Cache bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - run: bun install --frozen-lockfile
+      # bd is only distributed via Homebrew, release tarballs, `go install`, or this npm
+      # wrapper (which downloads the matching platform binary from the GitHub release in
+      # its postinstall). The npm route is the simplest reliable path on a Linux runner
+      # and lets us pin the exact version the test suite expects. Two things stand in the
+      # way of a plain `npm install -g`: npm blocks postinstall scripts for packages it
+      # hasn't seen before unless explicitly allow-listed (--allow-scripts), and the
+      # postinstall itself deliberately no-ops the binary download whenever CI=true (which
+      # every GitHub Actions step sets by default) — so it's unset just for this step.
+      - name: Install bd (beads CLI)
+        env:
+          CI: ''
+        run: |
+          npm install -g --allow-scripts=@beads/bd @beads/bd@${{ env.BD_VERSION }}
+          bd --version
+      # Integration tests seed bd server-mode projects (inbox activity via bd sql), which need
+      # the standalone dolt binary — bd's embedded engine does not cover `bd init --server`.
+      - name: Install dolt
+        run: |
+          curl -fsSL "https://github.com/dolthub/dolt/releases/download/v${DOLT_VERSION}/dolt-linux-amd64.tar.gz" | tar -xz
+          sudo install -m 0755 dolt-linux-amd64/bin/dolt /usr/local/bin/dolt
+          dolt version
+        env:
+          DOLT_VERSION: '2.5.0'
+      - run: bun run test
+
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      BD_NON_INTERACTIVE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - name: Cache bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - run: bun install --frozen-lockfile
+      - name: Install bd (beads CLI)
+        env:
+          CI: ''
+        run: |
+          npm install -g --allow-scripts=@beads/bd @beads/bd@${{ env.BD_VERSION }}
+          bd --version
+      # The e2e suite seeds a bd server-mode fixture (stopped-dolt-server spec), which needs the
+      # standalone dolt binary — bd's embedded engine does not cover `bd init --server`.
+      - name: Install dolt
+        run: |
+          curl -fsSL "https://github.com/dolthub/dolt/releases/download/v${DOLT_VERSION}/dolt-linux-amd64.tar.gz" | tar -xz
+          sudo install -m 0755 dolt-linux-amd64/bin/dolt /usr/local/bin/dolt
+          dolt version
+        env:
+          DOLT_VERSION: '2.5.0'
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('bun.lock') }}
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run test:e2e
