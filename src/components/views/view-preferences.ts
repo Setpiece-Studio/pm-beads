@@ -13,7 +13,7 @@ export interface IssueViewPreference {
 }
 
 export interface ProjectViewPreference {
-  view?: 'tree' | 'board'
+  view?: 'tree' | 'board' | 'gantt'
   display?: string
   grouping?: 'status' | 'none'
   ordering?:

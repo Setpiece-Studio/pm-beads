@@ -1,3 +1,14 @@
+# v0.1.1 — Project Gantt roadmap
+
+- Read-only project Gantt grouped by assignee, ordered by `gantt_order` metadata.
+- Bars sized by leaf subissues, with completion fill and prerequisite arrows.
+- Compact rows and a fixed project column during horizontal scrolling.
+- Chart guidance and warnings in Display; filters, saved views, and detail navigation preserved.
+
+Choose **Projects → Display → View → Gantt**. The axis measures work units, not dates. See the [team workflow](USAGE.md#team-workflow-maintaining-the-roadmap) for setup.
+
+Source distribution only. Supported tools remain Node 24, Bun 1.3.14, bd 1.2.2, and Dolt 2.5.0. **Run locally against trusted repositories; the app has no authentication and must not be exposed publicly.**
+
 # v0.1.0 — First public source release
 
 pm-beads gives people and coding agents a shared local interface to Beads workspaces.

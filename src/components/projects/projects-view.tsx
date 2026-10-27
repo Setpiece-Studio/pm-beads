@@ -2,7 +2,7 @@
 // ABOUTME: collapsible headers, and per-epic inline expansion of lazily fetched children.
 
 import { ChevronDown, ChevronRight } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { FilterBar } from '@/components/filters/filter-bar'
 import {
   type ActiveFilter,
@@ -25,6 +25,8 @@ import {
   ProjectsDisplayOptions,
   type ProjectsDisplayOptionsPatch,
 } from './projects-display-options'
+import { ProjectsGantt } from './projects-gantt'
+import { buildGantt } from './projects-gantt-model'
 import {
   buildEpicGroups,
   buildEpicTree,
@@ -41,6 +43,7 @@ export interface ProjectsViewProps {
   boardStatuses?: readonly string[]
   onStatusChange?: (id: string, status: string) => Promise<void>
   epics: EpicStatus[]
+  ganttIssues?: Issue[]
   filters: ActiveFilter[]
   /** List (flat grouped) or the nested containment tree. */
   view: ProjectViewMode
@@ -63,6 +66,7 @@ export interface ProjectsViewProps {
 
 export function ProjectsView({
   epics,
+  ganttIssues = [],
   filters,
   view,
   grouping,
@@ -79,6 +83,17 @@ export function ProjectsView({
   boardStatuses = [],
   onStatusChange = async () => {},
 }: ProjectsViewProps) {
+  const gantt = useMemo(
+    () =>
+      view === 'gantt'
+        ? buildGantt(
+            selectVisibleEpics(epics, filters).map((entry) => entry.epic),
+            ganttIssues,
+            edges,
+          )
+        : undefined,
+    [view, epics, filters, ganttIssues, edges],
+  )
   const groups = buildEpicGroups(
     epics,
     { grouping, ordering, filters, statusOrder },
@@ -117,10 +132,13 @@ export function ProjectsView({
             grouping={grouping}
             ordering={ordering}
             onChange={onViewOptionsChange}
+            gantt={gantt}
           />
         </div>
       </div>
-      {view === 'board' ? (
+      {gantt ? (
+        <ProjectsGantt model={gantt} onSelect={onSelectEpic} />
+      ) : view === 'board' ? (
         <ProjectsBoard
           epics={groups.flatMap((group) => group.epics)}
           statuses={boardStatuses}

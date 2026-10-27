@@ -21,6 +21,7 @@ import {
   ProjectPropertiesContext,
   serializeProjectProperties,
 } from './project-properties'
+import type { GanttModel } from './projects-gantt-model'
 import type {
   ProjectGroupingKey,
   ProjectOrderingKey,
@@ -31,6 +32,7 @@ const VIEWS: { value: ProjectViewMode; label: string }[] = [
   { value: 'list', label: 'List' },
   { value: 'board', label: 'Board' },
   { value: 'tree', label: 'Hierarchy' },
+  { value: 'gantt', label: 'Gantt' },
 ]
 
 const GROUPINGS: { value: ProjectGroupingKey; label: string }[] = [
@@ -56,6 +58,7 @@ export interface ProjectsDisplayOptionsPatch {
 }
 
 interface ProjectsDisplayOptionsProps {
+  gantt?: GanttModel
   view: ProjectViewMode
   grouping: ProjectGroupingKey
   ordering: ProjectOrderingKey
@@ -67,6 +70,7 @@ export function ProjectsDisplayOptions({
   grouping,
   ordering,
   onChange,
+  gantt,
 }: ProjectsDisplayOptionsProps) {
   const { properties } = useContext(ProjectPropertiesContext)
   return (
@@ -104,7 +108,7 @@ export function ProjectsDisplayOptions({
               </SelectContent>
             </Select>
           </OptionRow>
-          {view !== 'tree' && (
+          {view !== 'tree' && view !== 'gantt' && (
             <>
               <OptionRow label="Grouping">
                 <Select
@@ -155,37 +159,82 @@ export function ProjectsDisplayOptions({
             </>
           )}
         </div>
-        <div className="border-t p-3">
-          <p className="mb-2 text-xs text-muted-foreground">
-            Display properties
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {PROJECT_PROPERTIES.map((property) => (
-              <button
-                type="button"
-                key={property}
-                aria-pressed={properties.has(property)}
-                className="rounded-md border px-2 py-0.5 text-xs aria-pressed:bg-secondary"
-                onClick={() => {
-                  const next = new Set(properties)
-                  if (next.has(property)) next.delete(property)
-                  else next.add(property)
-                  onChange({ display: serializeProjectProperties(next) })
-                }}
-              >
-                {(
-                  {
-                    'child-count': 'Child count',
-                    project: 'Parent project',
-                    id: 'ID',
-                  } as Record<string, string>
-                )[property] ?? property[0].toUpperCase() + property.slice(1)}
-              </button>
-            ))}
+        {view === 'gantt' ? (
+          <GanttNotes model={gantt} />
+        ) : (
+          <div className="border-t p-3">
+            <p className="mb-2 text-xs text-muted-foreground">
+              Display properties
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {PROJECT_PROPERTIES.map((property) => (
+                <button
+                  type="button"
+                  key={property}
+                  aria-pressed={properties.has(property)}
+                  className="rounded-md border px-2 py-0.5 text-xs aria-pressed:bg-secondary"
+                  onClick={() => {
+                    const next = new Set(properties)
+                    if (next.has(property)) next.delete(property)
+                    else next.add(property)
+                    onChange({ display: serializeProjectProperties(next) })
+                  }}
+                >
+                  {(
+                    {
+                      'child-count': 'Child count',
+                      project: 'Parent project',
+                      id: 'ID',
+                    } as Record<string, string>
+                  )[property] ?? property[0].toUpperCase() + property.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </PopoverContent>
     </Popover>
+  )
+}
+
+function GanttNotes({ model }: { model?: GanttModel }) {
+  const conflicts = model?.links.filter((link) => link.conflict).length ?? 0
+  const hidden = model?.hiddenBlockers ?? 0
+  const cyclic = model?.lanes.some((lane) =>
+    lane.bars.some((bar) => bar.cyclic),
+  )
+  return (
+    <div className="space-y-2 border-t p-3 text-xs text-muted-foreground">
+      <p>
+        Grouped by assignee. Planned sequence first, then priority and title.
+      </p>
+      <p>
+        Width counts leaf subissues; fill shows completion. Empty projects
+        occupy one unit. The axis measures work, not dates.
+      </p>
+      <p>
+        Arrows show project prerequisites. Each assignee starts at zero;
+        cross-lane positions do not imply calendar timing.
+      </p>
+      {conflicts > 0 && (
+        <p className="text-amber-600 dark:text-amber-400">
+          {conflicts} prerequisite {conflicts === 1 ? 'conflict' : 'conflicts'}{' '}
+          in the displayed sequence (amber arrows).
+        </p>
+      )}
+      {hidden > 0 && (
+        <p>
+          {hidden} project{' '}
+          {hidden === 1 ? 'prerequisite is' : 'prerequisites are'} outside the
+          current filters; arrows omitted.
+        </p>
+      )}
+      {cyclic && (
+        <p className="text-amber-600 dark:text-amber-400">
+          Containment cycle detected. Counts include reachable leaf work only.
+        </p>
+      )}
+    </div>
   )
 }
 

@@ -33,7 +33,42 @@ An epic has its own status, just like an issue. Its progress shows closed versus
 
 The available statuses come from the workspace's Beads configuration and data. pm-beads can configure their display order and icons, so a board follows that workspace's workflow rather than imposing one universal pipeline. Dragging a card between status columns writes the new status back to Beads.
 
-Projects offers List, Board, and Hierarchy. Issues offers a list and board. Filters, grouping, ordering, and display options live in the view controls; saved views belong to the workspace. Closed projects are hidden until included by a status filter. Closed issues appear in the Done group when grouped by status; other groupings need an explicit status filter to include them.
+Projects offers List, Board, Hierarchy, and Gantt. Issues offers a list and board. Filters, grouping, ordering, and display options live in the view controls; saved views belong to the workspace. Closed projects are hidden until included by a status filter. Closed issues appear in the Done group when grouped by status; other groupings need an explicit status filter to include them.
+
+Choose **Display → View → Gantt** for a read-only owner roadmap. Bar width counts leaf subissues, including closed work; the filled portion shows completion. The axis measures work units, not dates. Click a project to open it. Bars cannot be dragged or resized.
+
+The project's **Assignee** defines its lane; the separate Beads `owner` account field is ignored. Projects without an assignee appear in Unassigned. Set a project's planned sequence through Beads metadata:
+
+```bash
+bd update <epic-id> --set-metadata gantt_order=100
+```
+
+Lower ranks come first; unranked projects follow, ordered by priority, title, then ID. Actual `blocks` relationships appear as prerequisite arrows. Amber arrows flag conflicts with the displayed sequence without changing dependencies. Filters and saved views work as in the other project views. Nested project bars include their own leaf work, which also contributes to their ancestor bars.
+
+Chart explanations and warnings are in **Display**. Refresh after changing beads through the CLI.
+
+### Team workflow: maintaining the roadmap
+
+1. Select your workspace, then **Projects → Display → View → Gantt**.
+2. Assign each epic to the responsible person or agent using its Assignee field. Assigning child issues alone does not move the epic's lane.
+3. Set `gantt_order` on the epic to express its sequence within that assignee's lane. Use spaced numbers such as 100, 200, and 300; lower numbers come first. This is a planning rank, not a date or a priority change.
+4. Attach work through parent-child relationships. Leaf work determines width; closing work increases the fill without shrinking the bar. Epic containers do not count as work units.
+5. Add a blocking dependency only when one project really requires another. Never add a blocker just to arrange bars. The Gantt does not change readiness, status, dependencies, or assignments.
+
+Example commands, with placeholders replaced by actual bead IDs:
+
+```bash
+# Responsible agent and planned position for an epic
+bd update <epic-id> --assignee data-engineer --set-metadata gantt_order=100
+
+# File a work item under that epic
+bd update <task-id> --parent <epic-id>
+
+# A real prerequisite: the dependent must wait for the prerequisite
+bd dep add <dependent-epic-id> <prerequisite-epic-id>
+```
+
+Open **Display** to inspect warnings. Amber arrows flag a prerequisite ending after the dependent's displayed start. Each lane starts at zero, so cross-lane positions are not delivery dates. Closed projects are hidden by default; add a status filter to include them. Click a bar or title for details; this version has no dragging or resizing.
 
 ### Custom statuses
 

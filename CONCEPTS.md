@@ -26,6 +26,12 @@ Hierarchy rendering guards against cycles and keeps disconnected epics visible. 
 ### Board
 Projects arranged in columns following the workspace's status pipeline. Dragging a project to a column updates its status. Progress and child counts remain independent display properties.
 
+### Gantt
+
+A read-only owner roadmap measured in work units rather than dates. Each project bar spans its leaf work descendants (including closed work), with the closed fraction filled. Intermediate containers and epic beads are excluded from that project's count. Empty projects have zero subissues and a minimum one-unit bar. Nested projects remain individual rows, so their work also contributes to their ancestors; lane totals are not deduplicated workload estimates.
+
+Lanes use the project's `assignee`, the person or agent responsible for the work. Beads' separate `owner` account field does not determine the lane. Within each lane, finite numeric `metadata.gantt_order` values sort first, ascending; numeric strings are accepted. Missing or invalid ranks follow, with priority, title, and ID breaking ties. Unassigned projects appear under Unassigned. Blocking relationships draw project-to-project prerequisite arrows without changing the planned order. Amber arrows mark prerequisites ending after the dependent's displayed start; cross-lane work units do not imply calendar timing. The Display popover contains chart guidance, filtered-out prerequisite counts, and containment-cycle warnings.
+
 ## Pull requests
 
 ### Linked PR

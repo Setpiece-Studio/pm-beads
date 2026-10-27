@@ -6,7 +6,7 @@ A local, Linear-style web UI for the [Beads](https://github.com/steveyegge/beads
 
 ## What you can do
 
-- Organize issues in a list or board; browse projects as a list, board, or containment hierarchy.
+- Organize issues in a list or board; browse projects as a list, board, containment hierarchy, or owner Gantt roadmap.
 - Create and edit issues with descriptions, priorities, assignees, labels, dependencies, and PR links.
 - Answer agent questions in an Inbox built from structured asks on work beads.
 - Save filtered views and switch between local Beads workspaces.

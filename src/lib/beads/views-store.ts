@@ -21,7 +21,7 @@ const savedViewSchema = z.object({
   // Same shape normalizeViewParams produces; hand-edited entries with values
   // outside it are skipped by the lenient read.
   params: z.object({
-    view: z.enum(['board', 'tree']).optional(),
+    view: z.enum(['board', 'tree', 'gantt']).optional(),
     grouping: z.enum(['status', 'project', 'label', 'none']).optional(),
     ordering: z.enum(['priority', 'status', 'updated']).optional(),
     display: z.string().optional(),
