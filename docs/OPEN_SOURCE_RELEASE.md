@@ -1,6 +1,6 @@
 # Open-Source Release Checklist
 
-Use this checklist before making the repository public or cutting the first release.
+Use this checklist before making the repository public or publishing a source release. For subsequent releases, follow the point-release workflow below; initial-publication steps do not require rebuilding public history.
 
 ## Release source
 
@@ -75,3 +75,22 @@ Confirm that the installed skill includes `references/asks.md` and `references/w
 - Tag the first public source release after the checklist passes.
 - Include the supported Node, Bun, and `bd` expectations in release notes.
 - Call out the local-only/no-auth security model prominently.
+
+### Point releases
+
+1. Start a branch from current `main` in the public repository. If changes originate in a private checkout, transfer only the reviewed diff onto public history; never merge private ancestry or push private refs. Preserve sanitized fixtures and review new text, images, and commit author metadata.
+2. Bump the patch version in `package.json`, keeping `"private": true`, and add the user-facing changes to `docs/RELEASE_NOTES.md`. Update usage documentation and the agent skill when behavior changes.
+3. Install with `bun install --frozen-lockfile` in a clean public checkout and run all five verification gates above. Inspect failures before retrying; record unresolved follow-up work rather than weakening checks.
+4. Push the branch and open a pull request against public `main`. Wait for all required GitHub checks, then merge through the protected-branch workflow. Do not bypass branch protection.
+5. Fetch the merged commit and verify its tree matches the validated candidate. If merging changed the contents, validate the resulting changes before tagging. Create an annotated version tag on that exact merged commit and push only that tag; do not move an existing release tag.
+6. Publish the GitHub source release from the pushed tag, using the release notes and identifying the supported tooling and local-only/no-auth model. Do not publish to npm.
+7. Verify that the published release is not a draft or prerelease, that its tag resolves to the intended merged commit, and that the checkout is clean and up to date. Record the release URL and verification in the tracking issue, then close and sync it under the workspace's workflow.
+
+For an authorized release, after substituting the new version and verified merged commit:
+
+```bash
+git tag -a v0.1.2 <merged-commit> -m 'pm-beads v0.1.2'
+git push origin refs/tags/v0.1.2
+gh release create v0.1.2 --repo Setpiece-Studio/pm-beads \
+  --verify-tag --title 'v0.1.2' --notes-file /path/to/release-notes.md --latest
+```

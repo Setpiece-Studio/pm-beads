@@ -27,9 +27,15 @@ Use Markdown, code spans for paths and commands, and **bare bead IDs in prose** 
 
 - An epic is an outcome that can finish; a feature is a shippable slice; a task is a concrete unit. Split sprawling epics and separately track trailing cleanup that can ship later.
 - Prefer shallow containment and one parent per bead. Labels group cross-cutting releases and topics; the assignee field records ownership. Follow the project's conventions when they differ.
-- A blocking edge means work genuinely cannot proceed: `bd dep add A B` means A depends on B. Use priority for importance and prose for preferred sequencing. Containment and blocking are separate; pm-beads Hierarchy uses only containment.
+- A blocking edge means work genuinely cannot proceed: `bd dep add A B` means A depends on B. Use priority for importance and an epic's numeric `gantt_order` metadata for planned Gantt sequencing; never add blockers just to arrange bars. Containment and blocking are separate; pm-beads Hierarchy uses only containment.
 - To preserve a flat ID, create first, then attach with `bd update <child> --parent <epic>`. Existing dotted IDs work too; do not recreate issues just to change their ID shape.
 - Rehome children before retiring an epic. Keep a pointer to the replacement and close the old epic so existing references remain useful.
+
+### Maintain the Gantt roadmap
+
+The epic's **Assignee** controls its lane; Beads' separate `owner` account field and child assignees do not. Set a planned position with `bd update <epic-id> --assignee <handle> --set-metadata gantt_order=100`. Lower ranks come first within each lane; use spaced values such as 100, 200, and 300. Unranked projects follow in priority, title, then ID order.
+
+Attach work through parent-child relationships. Bar width counts leaf work, including closed work; closing a leaf increases completion without shrinking the bar. Epic containers do not count as work units. This is a read-only work-unit roadmap, not a calendar or a readiness calculation. Real blocking edges appear as arrows; inspect sequence warnings in **Projects → Display**.
 
 ### Respect the workspace's statuses
 
