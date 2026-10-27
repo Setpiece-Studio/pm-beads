@@ -9,7 +9,7 @@ import type { EpicStatus, Issue } from '@/lib/beads/types'
 import { STATUS_ORDER, statusLabel, statusRank } from '@/lib/issue-meta'
 
 /** The projects view layout: the flat grouped list (default) or the nested containment tree. */
-export type ProjectViewMode = 'list' | 'board' | 'tree'
+export type ProjectViewMode = 'list' | 'board' | 'tree' | 'gantt'
 
 export type ProjectGroupingKey = 'status' | 'none'
 export type ProjectOrderingKey =

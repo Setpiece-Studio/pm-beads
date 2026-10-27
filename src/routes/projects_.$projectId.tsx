@@ -47,7 +47,7 @@ import { useDeferredRead } from '@/lib/use-deferred-read'
 // the very list the user clicked from. Every key is optional here (unlike the list route, which
 // defaults them): their absence is how a deep link says "no list behind this".
 const listContextSchema = z.object({
-  view: z.enum(['list', 'board', 'tree']).optional().catch(undefined),
+  view: z.enum(['list', 'board', 'tree', 'gantt']).optional().catch(undefined),
   display: z.string().optional().catch(undefined),
   grouping: z.enum(['status', 'none']).optional().catch(undefined),
   ordering: z
@@ -125,7 +125,7 @@ async function loadSiblingIds(deps: {
   view?: ProjectViewMode
 }): Promise<string[] | null> {
   if (deps.grouping === undefined && deps.ordering === undefined) return null
-  if (deps.view === 'tree') return null
+  if (deps.view === 'tree' || deps.view === 'gantt') return null
   const statuses = await listEpicsFn({ data: { projectDir: deps.project } })
   const epicIssues = await listIssuesFn({
     data: { types: ['epic'], all: true, projectDir: deps.project },

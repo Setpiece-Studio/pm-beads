@@ -63,7 +63,10 @@ const projectsSearchSchema = z.object({
   // Legacy drawer param: tolerated on input so beforeLoad can redirect old links.
   issue: z.string().optional().catch(undefined),
   filter: z.string().optional().catch(undefined),
-  view: z.enum(['list', 'board', 'tree']).default('list').catch('list'),
+  view: z
+    .enum(['list', 'board', 'tree', 'gantt'])
+    .default('list')
+    .catch('list'),
   display: z.string().optional().catch(undefined),
   grouping: z.enum(['status', 'none']).default('status').catch('status'),
   ordering: z
@@ -93,7 +96,10 @@ export const Route = createFileRoute('/projects')({
       })
     }
   },
-  loaderDeps: ({ search }) => ({ project: search.project }),
+  loaderDeps: ({ search }) => ({
+    project: search.project,
+    gantt: search.view === 'gantt',
+  }),
   loader: async ({ deps }) => {
     // Sequential on purpose: bd's embedded dolt backend is single-writer/single-opener,
     // so concurrent bd processes fail to open the database.
@@ -101,9 +107,14 @@ export const Route = createFileRoute('/projects')({
     const statuses = await listEpicsFn({ data: { projectDir: deps.project } })
     // The complete epic set (closed + childless included), which also carries the dependency
     // edges epic status omits. It's the row source; epic status is left-joined for progress.
-    const epicIssues = await listIssuesFn({
-      data: { types: ['epic'], all: true, projectDir: deps.project },
+    const issues = await listIssuesFn({
+      data: {
+        types: deps.gantt ? undefined : ['epic'],
+        all: true,
+        projectDir: deps.project,
+      },
     })
+    const epicIssues = issues.filter((issue) => issue.issue_type === 'epic')
     const epics = joinEpicProgress(epicIssues, statuses)
     const edges = buildEpicBlockingEdges(epicIssues)
     // Canonical parent-child links the hierarchy view nests on.
@@ -111,7 +122,13 @@ export const Route = createFileRoute('/projects')({
     const statusPipeline = await readStatusPipelineFn({
       data: { projectDir: deps.project },
     })
-    return { epics, edges, treeEdges, statusPipeline }
+    return {
+      epics,
+      edges,
+      treeEdges,
+      statusPipeline,
+      ganttIssues: deps.gantt ? issues : [],
+    }
   },
   component: ProjectsRoute,
 })
@@ -396,6 +413,7 @@ function ProjectsRouteContent() {
       >
         <ProjectsView
           epics={epics}
+          ganttIssues={loaded.ganttIssues}
           filters={filters}
           view={view}
           grouping={grouping}

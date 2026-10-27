@@ -57,6 +57,20 @@ describe('readViews', () => {
 })
 
 describe('saveView / deleteView', () => {
+  it('round-trips a Gantt view without unrelated layout options', async () => {
+    const saved = await saveView(projectDir, {
+      name: 'Owner roadmap',
+      route: 'projects',
+      params: {
+        view: 'gantt',
+        ordering: 'child-count',
+        grouping: 'none',
+        filter: 'status:is:open',
+      },
+    })
+    expect(saved.params).toEqual({ view: 'gantt', filter: 'status:is:open' })
+    expect(readViews(projectDir)).toEqual([saved])
+  })
   it('round-trips a saved view with normalized params', async () => {
     const saved = await saveView(projectDir, {
       name: 'Bug board',

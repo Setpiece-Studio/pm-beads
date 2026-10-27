@@ -16,7 +16,7 @@ export type ViewRoute = (typeof VIEW_ROUTES)[number]
 
 /** The view-shape params a saved view may carry. project/issue are never included. */
 export interface SavedViewParams {
-  view?: 'board' | 'tree'
+  view?: 'board' | 'tree' | 'gantt'
   grouping?: 'status' | 'project' | 'label' | 'none'
   ordering?:
     | 'priority'
@@ -97,6 +97,9 @@ export function normalizeViewParams(
 ): SavedViewParams {
   const filter = normalizedFilter(raw.filter)
   if (route === 'projects') {
+    // Gantt has fixed owner grouping, planned ordering, and its own display fields.
+    if (raw.view === 'gantt')
+      return filter ? { view: 'gantt', filter } : { view: 'gantt' }
     // The projects view shape is view (list default / tree) + grouping + ordering +
     // filter (no display properties), with its own grouping/ordering vocabulary.
     const params: SavedViewParams = {}
