@@ -68,6 +68,14 @@ bun install --frozen-lockfile
 
 Use the frozen lockfile so setup cannot introduce unrelated dependency changes.
 
+## View design conventions
+
+Keep project and issue views compact: use concise rows, restrained padding, and inline properties so people can scan many items together. Match neighboring views instead of adding a large explanatory header above the content.
+
+In the Gantt view, keep the project title and properties column fixed while the chart scrolls horizontally. Labels and bars must remain aligned vertically; verify that horizontal scrolling moves bars while leaving project labels in place, including at narrow viewport widths.
+
+Put view explanations and chart warnings in the **Display** popover. Keep them available alongside the controls they explain, and avoid duplicating them as a page preamble. Errors that prevent an action from completing still belong at the affected action.
+
 ## Working With Beads
 
 The maintainers track work with Beads; that private database is not distributed. Use the public repository's GitHub Issues for contributions, or your own Beads workspace for local tracking. Useful commands in a configured workspace:
